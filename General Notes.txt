@@ -1,0 +1,267 @@
+_______________________________________________________________________________________
+
+#images are the blue print of docker, it is a templates that docker take and create a concrete instances from it 
+#in the shape of containers i.e image instances
+#list images
+*docker images -l
+#remove image - force id running inside container
+*docker image rm 23211f6bccf4 f
+
+
+#To build docker image in the current folder
+*docker build .
+
+#build image with name and tag
+*docker build . -t 'app-test:v1'
+
+#you will get a GUID defining that created image.
+#run the image so you will get a running container
+# -p (external port that host will see):(internal port that server running on iinside container)
+*docker run -p 1000:5000 435sc4f
+# -p 1000:5000 will expose the internal 5000 port in docker to the out world outsied docker by 1000
+
+
+
+#to list all the running containers, get the required name for ex: modest_zhukovsky
+*docker ps 
+
+#to list all the containers, get the required name for ex: modest_zhukovsky
+*docker ps -a
+
+#to stop the container run :
+*docker stop modest_zhukovsky
+
+#run a container in an detached mode i.e background
+*docker run -d image
+
+# attach to a running container
+*docker -a container
+
+#run a container in an detached mode i.e background and interactively with ttl
+*docker run -it image
+
+
+#delete container
+* docker rm container
+* docker rm -f container
+
+#delete container after it stops
+* docker run --rm  container 
+
+
+#copy files from source directory to container
+*docker cp src/. container:/folder
+
+#name a container when running it
+* docker run image --name 'any name'
+
+#run a container with enviornment variable
+* docker run -d --rm -p 1000:8000 -e PORT=8000 --name node-app-cont -v E:/Projects/Workshop/WebDev/FullStack/Udemy/Docker/demo1/data:/app/data -v E:\Projects\Workshop\WebDev\FullStack\Udemy\Docker\demo1:/app node-app:env
+//__________________________________________________________________________________________________________________________________
+#anynomos volumes are live inside one container and it is isloated from other running containers based on the same image
+#named volumes are located on host machine outside the container and it is shared between containers with read only permissions
+#bind mounts volumes are located on host machine outside the container and it is shared between containers with read/write permissions
+
+#list volumes
+* docker volume ls
+
+# create container instance with  anynomos volume
+# anynomos voulme is created by the -v switch then the internal path inside the container
+# -v /app/data
+
+
+# create container instance with named volume
+# a named voulme is created by give a name after the -v switch then colon then the internal path inside the container
+# -v node-app-vol:/app/data
+
+# create container instance with bind mounted volume
+# a bind mounted voulme is created by give a full path name to the host directory that nedd to be mapped inside the container
+# after the -v switch then colon then the internal path inside the container
+* docker run -d --rm -p 1000:5000 --name node-app-1 -v node-app-vol:/app/data -v E:\Projects\Workshop\WebDev\FullStack\Udemy\Docker\demo1:/app node-app:volumes
+* docker run -d --rm -p 1000:5000 --name node-app-1 -v E:/Projects/Workshop/WebDev/FullStack/Udemy/Docker/demo1/data:/app/data -v E:\Projects\Workshop\WebDev\FullStack\Udemy\Docker\demo1:/app node-app:volumes
+#bind mounted volumes are not managed by docker and they will not appear in listing volumes command
+
+#create a bind mounted volume with read only attributes so the container cann't write to it
+* docker run -d --rm -p 1000:5000 --name node-app-1 -v E:/Projects/Workshop/WebDev/FullStack/Udemy/Docker/demo1/data:/app/data:ro node-app:volumes
+
+//__________________________________________________________________________________________________________________________________
+#build image and container
+docker build . -t hello-python:v1 
+docker run  -d --rm -p 1000:5000   --name hello-python-container -v /home/ksaleh/Projects/Udacity/CloudNative/nd064_course_1/exercises/python-helloworld:/app   hello-python:v1 
+//____________________________________________________________________________________________________
+
+
+
+#We must create a cluster by ower own
+Clusters can be created using different tools like : kubeadm,kubespray,kops,k3s {production} - kind,minikube {development}
+These tools supports creating and bootstrapping of a cluster
+We will use k3s in the course
+When we execute k3s it will create 1 cluster with a 1 master node and a worker node and installs also kubectl which acts as cli to the cluster resources
+or a control pannel
+
+# kubectl is a component/service/tool that let us talk with master nodes in a cluster
+it gives the master node orders and commands that the master will use it to communicate and order the worker nodes inside the cluster
+
+#Vagrant is a tool setting between virtual machine software or tool  like (Virtual Box,Docker,Hyper-V) and a VM instances
+So we can use it with any of the mentioned 3 tools to create virtual boxes.
+
+#procedures: using Vagrant box to create kubernetes cluster using k3s
+1-install vagrant from inside the bash of remote desktop of ubunto
+2- build the VM using vagrant up commands
+3- check the VM by issuing vagrant status
+4- open a shell with the VM by issuing vagrant ssh
+5-install k3s inside the VM by using the command:  
+curl -sfl https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+
+#this will install the k3s tool that creates the cluster among with the main master node and the kubectl cli
+6- check the previous process success by issuing the command : kubectl get no 
+
+
+#Creating pods:
+#pods are the smallest deployment units in a cluster
+1-create deployment resource: kubectl create deploy py-helloworld --image=ksaleh/python:v3
+2- forward port:  
+kubectl port-forward  pod/techtrends-deployment-6567f5b4f4-pbxvr -n sandbox --address 0.0.0.0 3111:3111
+#port forward must be in action and running in order to communicate to the pod directly
+#communication must use the ex ip of the vagrant machine i.e: 192.168.50.4:3111
+
+#Exposing pods outside the cluster:
+# list all services in the cluster
+kubectl get svc
+
+#create a service 
+kubectl expose deploy py-app-dep --port=6111 --target-port=6111
+
+#to test it create another pod in the cluster that based on alpine linux distribution and open a shell then curl 
+#the exposed service to see what it returns
+#run random name pod in the default namespace , remove it when we exit from , make it interactive with the shell
+#and open the shell immedialty:
+kubectl run test-$RANDOM --namespace=sandbox --rm -it --image=alpine -- sh
+
+#then call wget , it is equivilent to curl
+# -O- to output to stdout , 10.43... the cluster ip and the exposed port 
+wget -O- -S 10.43.105.59:6111
+
+//______________________________________________________________________
+#Creating Kubernetes Resources:
+#create a name space "demo:
+kubectl create ns demo
+#label it
+kubectl label ns demo tier=test
+
+#create deployemnt
+kubectl create deployment nginx-alpine --image=nginx:alpine --replicas=3 --namespace=demo 
+kubectl label deployment nginx-alpine -n demo tag=alpine 
+kubectl label deployment nginx-alpine -n demo app=nginx
+
+#create service
+kubectl expose deployment nginx-alpine -n demo --port 8111
+
+#create config map
+kubectl create cm nginx-version --from-literal=version=alpine --namespace demo
+//_____________________________________________________________
+#create resources by decalritive YAML
+#create a namespace resource that is descripbed using the manifist namespace.yaml
+kubectl apply -f namespace.yaml
+
+#delete the resource described in the manifist
+kubectl delete -f resource,yaml
+
+#get the yaml formatted description of a resource and redirect it to a file
+kubectl get deploy -o yaml > test-deploy.yaml
+
+#create innitial ymal file for a resource
+kubectl create deploy dep-name --image=image-name --dry-run=client -o yaml > dep-name.yaml
+
+
+//_____________________________________________________________
+#CI - continous integration
+GitHub actions consist of jobs
+A Job consist of Steps
+A Step contain a Script or Action that can be executed
+it is written like this :
+jobs (group a collection of actions that will run nder when event is triggered):
+  
+  (every job runs on its seperate virtual machine)
+  build (name of job): 
+    runs-on (os of virtual machine that we want to run under) : ubunto-latest or ${{matrix.os}}
+    (think that we are creating a virtual machine that contains the source code repository of our project and we are running some
+    programs against it to produce a deployment unit at the end)
+     strategy:
+      matrix: python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+       os: [ubunto-latest, windows-latest, macOS-latest]
+
+    steps (the actions that will exexute):
+      
+     -name : action name
+      uses (means it will use the pre built action in github store of actions)  : actions/checkout@v2 (here we will use an action named checkout with a version of v2)
+      with : python-version (language-version): ${{ matrix.python-version }}
+      
+      
+     -name : action name
+      run (run acommand) : blah blah blah
+
+
+  publish (anothe job that must executed after build job is finished):
+    needs: build (the above job)
+
+
+    //______________________________________________________________________
+    #Using ArgoCD
+    -install it inside vagrant box
+    -browse the pods and services
+    kubectl get svc -n argocd  
+    kubectl get po -n argocd  
+
+    #get the argocd-server YAML description into a file
+    kubectl get svc -n argocd argocd-server -o yaml > argocd-nodeport.yaml
+    #then change the file as the video to create an exposed service outside the cluster that enable us to manage argocd from the browser
+    
+
+
+//_____________________________________________________________________________________
+  
+//_____________________________________________________________________________________
+  #copy files from vagrant to local machine
+  #fisrt from local machine prompt (WSL2 ubuntu) outside vagrant issue the command:
+  choco upgrade powershell
+  vagrant ssh-config
+  
+  HostName 172.19.160.1
+  User vagrant
+  Port 2000
+
+
+
+  #this will inform you by the ip,port,user name of the vagrant VM
+  #then issue the following copy file command to copy from vagrant to local machine
+  scp -P 2222 vagrant@172.17.64.1:/home/vagrant/namespace.yaml ./techtrends/manifests
+  #where  2222 is the port of the virtual machine and the vagrant@172.17.64.1 is the user@machinename
+  #then the /home/vagrant/   is where the file is located inside the vagrant VM , here we are cpoying the namespace.yaml file
+  # then the ./techtrends/manifests is the destaination in the local machine
+
+  #copy from local to vagrant
+    scp -P 2000   ./deployment/*.* vagrant@172.19.160.1:/home/vagrant/deployment
+    scp -P 2000   ./script/*.* vagrant@172.19.160.1:/home/vagrant/script
+    scp -P 2000   ./script/db/*.* vagrant@172.19.160.1:/home/vagrant/db
+
+
+vagrant up --provision 
+# vagrant ssh password = vagrant
+
+#if kubectl make errors
+sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+
+kubectl delete -f deployment
+kubectl apply -f deployment
+kubectl get pods
+- Seed your database against the postgres pod. 
+cd script
+sh run_db_command.sh postgres-554d66564b-zrt2g 
+
+debug pods
+kubectl describe pod {pod name}
+kubectl describe pod
+kubectl logs --previous ${POD_NAME} ${CONTAINER_NAME}
+#to stop a pod
+kubectl scale --replicas=0 deployment/<your-deployment>
