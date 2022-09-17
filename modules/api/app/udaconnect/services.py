@@ -2,9 +2,9 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-from app import db
-from app.udaconnect.models import Connection, Location, Person
-from app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
+from modules.api.app import db
+from modules.api.app.udaconnect.models import Connection, Location, Person
+from modules.api.app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
 from geoalchemy2.functions import ST_AsText, ST_Point
 from sqlalchemy.sql import text
 
@@ -28,7 +28,7 @@ class ConnectionService:
         ).filter(Location.creation_time < end_date).filter(
             Location.creation_time >= start_date
         ).all()
-
+        
         # Cache all users in memory for quick lookup
         person_map: Dict[str, Person] = {person.id: person for person in PersonService.retrieve_all()}
 
@@ -83,7 +83,7 @@ class ConnectionService:
 
 class LocationService:
     @staticmethod
-    def retrieve(location_id) -> Location:
+    def  retrieve(location_id) -> Location:
         location, coord_text = (
             db.session.query(Location, Location.coordinate.ST_AsText())
             .filter(Location.id == location_id)

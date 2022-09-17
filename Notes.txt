@@ -1,0 +1,78 @@
+python -m pip install -r requirements.txt
+ 
+
+ToDo:
+1)install postgresql db in a docker and seed it by the proper data
+2)Try to run the api solution and make it connect to the db
+3)Debug in the code successfully
+4)Modify the architecture
+
+
+
+#this image postgis/postgis is crucial to support the GEOMETRY column type
+# create a running container based on that image
+#ubunto
+docker run -p 5432:5432 -d -e POSTGRES_USER="ct_admin" -e POSTGRES_PASSWORD="d293aW1zb3NlY3VyZQ==" -e POSTGRES_DB="geoconnections" -v ${PWD}/pg-data:/var/lib/postgresql/data --name pg-container  postgis/postgis
+
+#list all running images to know the id
+docker ps
+
+#open shell with the postgres container
+docker exec -it b353b8f09a23 bin/bash
+:
+#command the container to log u in the "geoconnections" db
+psql -U ct_admin -d geoconnections
+
+#create postgis extension o support the GEOMETRY
+create extension postgis;
+
+#issue sql queries to create the schema and populate it properly
+create & insert db stuff , copy and paste commands from script files right here
+
+
+export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"
+set PYTHONPATH=%PYTHONPATH%;"E:\Projects\Workshop\WebDev\FullStack\Udacity\Cloud Native\nd064-c2-message-passing-projects-starter-master\modules\api"
+
+
+python -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ persons.proto
+
+
+ToDo
+dockerize the grpcPersons
+dockerize the kafkaPersons
+make a rest conections service and dockerize it
+
+
+
+//udaconnect app
+docker build  . -t ksaleh/udaconnect-app
+docker run -d -p 30000:3000  --name udaconnect-app  ksaleh/udaconnect-app
+
+//udaconnect-api
+docker build -f api/Dockerfile . -t ksaleh/udaconnect-api
+docker run -d -p 30001:5000  --name udaconnect-api  ksaleh/udaconnect-api
+
+//http-connections-api
+docker build -f connections/Dockerfile . -t ksaleh/http-connections-api
+docker run -d  -p 30003:5000 --name http-connections-api  ksaleh/http-connections-api
+
+//grpc image
+docker build -f grpcPersons/Dockerfile . -t ksaleh/grpc-persons-api
+docker run  -d -p 30002:5006  --name grpc-persons-api  ksaleh/grpc-persons-api
+
+//kafka image
+docker build -f kaPersons/Dockerfile . -t ksaleh/kafka-persons-api
+docker run -d   --name kafka-persons-api  ksaleh/kafka-persons-api
+
+
+
+
+docker push ksaleh/kafka-persons-api
+docker push ksaleh/udaconnect-app
+docker push ksaleh/udaconnect-api
+docker push ksaleh/http-connections-api
+
+docker push ksaleh/grpc-persons-api
+
+
+

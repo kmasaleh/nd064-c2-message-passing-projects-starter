@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgresdb
+    container_name: postgresdb
+    build:
+      context: .
+      target: postgresdb
+    environment:
+      - POSTGRES_USER="ct_admin"
+      - POSTGRES_PASSWORD="d293aW1zb3NlY3VyZQ=="
+      - POSTGRES_DB="geoconnections"
+    ports:
+      - 5432:5432

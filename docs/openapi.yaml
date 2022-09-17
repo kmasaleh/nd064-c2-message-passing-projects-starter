@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  description: API for retriving a person's  connections
+  version: "1.0.0"
+  title: Person Connections API
+paths:
+  /persons/{person_id}/connection:
+    get:
+      summary: Retrieves all person's connections
+      operationId: getPersonConnections
+      description: Retrieves all person's connections that have been created.
+      parameters:
+       - in : path
+         name : person_id
+         schema:
+          type: number
+         required: true
+         description: Numric ID for the person to get his connections
+       - in: query
+         name : start_date
+         schema:
+          type: string
+         required: true
+         description: A datetime specify the start date of his connections
+       - in: query
+         name : end_date
+         schema:
+          type: string
+         required: true
+         description: A datetime specify the end date of his connections
+       - in: query
+         name : distance
+         schema:
+          type: number
+         required: true
+         description: A number specify the disance to lookup the connections within
+
+      responses:
+        '200':
+          description: All person's connections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Connection'
+        '400':
+          description: Bad input parameter
+components:
+  schemas:
+    Location:
+      type: object
+      required:
+        - id
+        - person_id
+        - longitude
+        - latitude
+        - creation_time
+      properties:
+        id:
+          type: number
+          example: 1
+        person_id:  
+          type: number
+          example: 7
+        longitude:  
+          type: string
+          example: "-106.5721845"
+        latitude:  
+          type: string
+          example: "35.058564"
+        creation_time:  
+          type: string
+          example: "2020-04-07T10:37:06"
+
+    Person:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - company_name
+      properties:
+        id:
+          type: number
+          example: 10
+        first_name:  
+          type: string
+          example: "Frank"
+        last_name:  
+          type: string
+          example: "Shader"
+        company_name:  
+          type: string
+          example: "USDA"
+
+    Connection:
+      type: object
+      required:
+        - location
+        - person
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        person:  
+          $ref: '#/components/schemas/Person'

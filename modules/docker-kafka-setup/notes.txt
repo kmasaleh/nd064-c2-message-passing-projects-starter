@@ -1,0 +1,46 @@
+#to install kafka in  docker containr we have to:
+1-write a docker-compose.yaml file as the one written here
+2-run the following docker compose command :
+        docker-compose -f docker-compose.yaml up -d
+  to install the kafka and the zookeeper images into our machine , zookeeper is the tool which talk to kafka and send it commands
+
+#then we log into the shell of the kafka docker container using this command:
+  docker exec -it kafka-container /bin/sh       
+
+#then move to the directory   cd /opt/kafka_2.13-8.2.1/bin
+
+#use the scirpt files to create topic
+kafka-topics.sh  --create --zookeeper zookeeper:2181 -replication-factor 1 --partitions 1 --topic test_kafka_topic
+
+#list topics
+kafka-topics.sh  --list --zookeeper zookeeper:2181 
+
+#use the scirpt files to delete topic
+kafka-topics.sh  --delete --zookeeper zookeeper:2181 --topic test_kafka_topic
+
+
+#use the scirpt files to describe  topic
+kafka-topics.sh  --describe --zookeeper zookeeper:2181 --topic test_kafka_topic
+
+
+#To produce a message in a topic by issuing the following command:
+kafka-console-producer.sh --broker-list  kafka:9092 --topic test_kafka_topic
+{ "user_id":1,"user_name":"khaled saleh","message":"hello kafka"}
+{ "user_id":2,"user_name":"waleed saleh","message":"hello khaled"}
+
+
+kafka-console-producer.sh --broker-list  localhost:9092 --topic test_kafka_topic
+{ "user_id":1,"user_name":"localhost","message":"hello kafka"}
+
+#To create a consumer :
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_kafka_topic
+
+#to list all the messages sent to a topic
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test_kafka_topic --from-beginning
+
+
+#to write kafka code using python we need to install kafka-python
+
+
+//article to explain networking with kafka
+https://rmoff.net/2018/08/02/kafka-listeners-explained/

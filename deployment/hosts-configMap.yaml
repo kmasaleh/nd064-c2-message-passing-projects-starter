@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  GRPC_PERSONS_SERVER_ADDRESS : "host.docker.internal"
+  KAFKA_SERVER_ADDRESS : "host.docker.internal"
+  CONNECTIONS_SERVER_ADDRESS : "host.docker.internal"
+
+metadata:
+  name: hosts-env

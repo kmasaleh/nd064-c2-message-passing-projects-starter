@@ -1,0 +1,21 @@
+The gRPC persons api service contains two api's.
+The first one to GetAllPersons rpc method which gets all the persons in the database,
+it takes nothing and retrieve a list of the persons.
+A person is defined as the following protobuf message :
+message PersonMessage{
+    int32 id =1;
+    string first_name = 2;
+    string last_name = 3;
+    string company_name = 4;
+}
+An integer to represent the person identity and three strings to represents the person's first, last and company names.
+The returned list of persons is defined as the following protobuf message:
+message PersonsMessage {
+    repeated PersonMessage persons =1;
+}.
+
+The second rpc api is GetPerson which takes a id message :
+PersonIdMessage {
+    int32 id =1;
+}
+And it returns a unique PersonMessage as the same message as described before.
